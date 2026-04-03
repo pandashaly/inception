@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mariadb:
+    container_name: mariadb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: custom-ft_onion:latest
+    # ports:
+    #   - "8080:80"
+    #   - "4242:4242"
+    volumes:
+
+    networks:
+    # restart: unless-stopped
+  
+
+networks:
+  ft_onion_network:
+    driver: bridge 
