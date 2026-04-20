@@ -1,0 +1,26 @@
+Here's the plan — 4 phases, each one you can run and test before moving on:
+Phase 1 — MariaDB only
+Get a database container running and verify you can connect to it.
+Phase 2 — WordPress + MariaDB
+Add WordPress talking to the database. Test they communicate.
+Phase 3 — NGINX + the full stack
+Add NGINX with SSL. Access your site in a browser.
+Phase 4 — Volumes, persistence, Makefile, docs
+Make data survive reboots. Clean everything up for eval.
+
+
+What is a container, and how is it different from a VM?
+
+What does docker-compose do vs just running docker commands?
+Docker lets you run one container at a time with a long command.
+docker-compose lets you define multiple containers in one file with one command and handles 
+the network between them automatically
+
+Why do we need 3 separate containers instead of putting everything in one?
+Each container does one job and its modular and safer.
+so if one thing crashes, the rest are fine.
+
+MariaDB — stores the data
+WordPress — runs the app
+NGINX — handles incoming web traffic and SSL
+
