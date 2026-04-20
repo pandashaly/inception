@@ -1,7 +1,6 @@
 NAME = inception
-
 USER = shaly
-COMPOSE = docker compose -p $(NAME)
+COMPOSE = docker compose -f srcs/docker-compose.yml -p $(NAME)
 DATA_PATH = /home/$(USER)/data
 
 RESET = \033[0m
@@ -15,23 +14,21 @@ up:
 	@echo "$(LILAC)Creating volume directories...$(RESET)"
 	@mkdir -p $(DATA_PATH)/vol_wp
 	@mkdir -p $(DATA_PATH)/vol_db
-	$(COMPOSE) up --build -d
 	@echo "$(PINK)Building and starting containers...$(RESET)"
+	@$(COMPOSE) up --build -d
 	@echo "$(MINT)Infrastructure is running!$(RESET)"
 
 down:
 	@echo "$(LILAC)Stopping containers...$(RESET)"
-	$(COMPOSE) down
+	@$(COMPOSE) down
 	@echo "$(MINT)Containers stopped successfully!$(RESET)"
 
 fclean: down
 	@echo "$(PINK)Full cleanup in progress...$(RESET)"
-	docker volumes rm -f
-	docker system prune --all --force --volumes
-	rm -rf $(DATA_PATH)
+	@docker system prune --all --force --volumes
+	@rm -rf $(DATA_PATH)
 	@echo "$(MINT)Everything cleaned successfully!$(RESET)"
 
-re: down all
+re: fclean all
 
 .PHONY: all up down fclean re
-
