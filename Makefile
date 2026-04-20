@@ -1,5 +1,5 @@
 NAME = inception
-USER = shaly
+USER = ssottori
 COMPOSE = docker compose -f srcs/docker-compose.yml -p $(NAME)
 DATA_PATH = /home/$(USER)/data
 
@@ -26,7 +26,7 @@ down:
 fclean: down
 	@echo "$(PINK)Full cleanup in progress...$(RESET)"
 	@docker system prune --all --force --volumes
-	@rm -rf $(DATA_PATH)
+	@sudo rm -rf $(DATA_PATH)
 	@echo "$(MINT)Everything cleaned successfully!$(RESET)"
 
 re: fclean all

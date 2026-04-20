@@ -1,68 +1,168 @@
+# services:
+#   nginx:
+#     build: ./requirements/nginx
+#     image: nginx
+#     container_name: nginx
+#     ports:
+#       - "443:443" #its the only container that exposes a port to the outside.
+#     networks:
+#       - inception
+#     volumes:
+#       - wordpress:/var/www/html #shares the same wp volume as the wp container
+#     depends_on:
+#       - wordpress
+#     restart: unless-stopped
+
+#   wordpress:
+#     build: ./requirements/wordpress
+#     image: wordpress
+#     container_name: wordpress
+#     expose:
+#       - "9000" #conainer uses this port
+#     networks:
+#       - inception
+#     volumes:
+#       - wordpress:/var/www/html
+#     depends_on:
+#       - mariadb # tells Docker to start MariaDB before WordPress
+#     env_file:
+#       - .env
+#     secrets:
+#       - db_password
+#       - wp_admin_password
+#       - wp_user_password
+#     restart: unless-stopped
+
+#   mariadb:
+#     build: ./requirements/mariadb
+#     image: mariadb
+#     container_name: mariadb
+#     expose:
+#       - "3306"
+#     networks:
+#       - inception
+#     volumes:
+#       - mariadb:/var/lib/mysql #where mdb stores data
+#     env_file:
+#       - .env
+#     secrets:
+#       - db_password
+#       - db_root_password
+#     restart: unless-stopped
+
+# volumes:
+#   wordpress:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/ssottori/data/vol_wp
+#   mariadb:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/ssottori/data/vol_db
+
+# networks:
+#   inception:
+#     driver: bridge
+
+# secrets:
+#   db_password:
+#     file: ../secrets/db_password.txt
+#   db_root_password:
+#     file: ../secrets/db_root_password.txt
+#   wp_admin_password:
+#     file: ../secrets/wp_admin_password.txt
+#   wp_user_password:
+#     file: ../secrets/wp_user_password.txt
+
+
+# # HOW IT ALL CONNECTS:
+# #
+# # internet (port 443)
+# #      |
+# #   [nginx]          - only entry point, handles SSL, serves the site
+# #      |
+# # [wordpress]        - runs php-fpm on port 9000, talks to the database
+# #      |
+# #   [mariadb]        - stores all wp data on port 3306
+# #
+# # nginx is the only one exposed to the internet
+# #
+# # VOLUMES:
+# # wordpress volume is shared between nginx and wordpress (site files)
+# # mariadb has its own volume (database)
+# # both stored at /home/ssottori/data/ on the host machine
+
+# # NETWORK:
+# # all containers are on the same network so they can reach each other by name
+# # usign brige network "inception"
+
+# # SECRETS:
+# # passwords are mounted at /run/secrets/ inside containers, never hardcoded
+
 services:
-  nginx:
-    build: ./requirements/nginx
-    image: nginx
-    container_name: nginx
-    ports:
-      - "443:443" #its the only container that exposes a port to the outside.
+
+  mariadb:
+    build: requirements/mariadb
+    image: mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    env_file: .env
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - vol_db:/var/lib/mysql
     networks:
       - inception
-    volumes:
-      - wordpress:/var/www/html #shares the same wp volume as the wp container
-    depends_on:
-      - wordpress
-    restart: unless-stopped
 
   wordpress:
-    build: ./requirements/wordpress
+    build: requirements/wordpress
     image: wordpress
     container_name: wordpress
-    expose:
-      - "9000" #conainer uses this port
-    networks:
-      - inception
-    volumes:
-      - wordpress:/var/www/html
-    depends_on:
-      - mariadb # tells Docker to start MariaDB before WordPress
-    env_file:
-      - .env
+    restart: unless-stopped
+    env_file: .env
     secrets:
       - db_password
       - wp_admin_password
       - wp_user_password
-    restart: unless-stopped
-
-  mariadb:
-    build: ./requirements/mariadb
-    image: mariadb
-    container_name: mariadb
-    expose:
-      - "3306"
+    volumes:
+      - vol_wp:/var/www/html
     networks:
       - inception
-    volumes:
-      - mariadb:/var/lib/mysql #where mdb stores data
-    env_file:
-      - .env
-    secrets:
-      - db_password
-      - db_root_password
+    depends_on:
+      - mariadb
+
+  nginx:
+    build: requirements/nginx
+    image: nginx
+    container_name: nginx
     restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - vol_wp:/var/www/html
+    networks:
+      - inception
+    depends_on:
+      - wordpress
 
 volumes:
-  wordpress:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/ssottori/data/vol_wp
-  mariadb:
+  vol_db:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /home/ssottori/data/vol_db
+  vol_wp:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ssottori/data/vol_wp
 
 networks:
   inception:
@@ -77,28 +177,3 @@ secrets:
     file: ../secrets/wp_admin_password.txt
   wp_user_password:
     file: ../secrets/wp_user_password.txt
-
-
-# HOW IT ALL CONNECTS:
-#
-# internet (port 443)
-#      |
-#   [nginx]          - only entry point, handles SSL, serves the site
-#      |
-# [wordpress]        - runs php-fpm on port 9000, talks to the database
-#      |
-#   [mariadb]        - stores all wp data on port 3306
-#
-# nginx is the only one exposed to the internet
-#
-# VOLUMES:
-# wordpress volume is shared between nginx and wordpress (site files)
-# mariadb has its own volume (database)
-# both stored at /home/ssottori/data/ on the host machine
-
-# NETWORK:
-# all containers are on the same network so they can reach each other by name
-# usign brige network "inception"
-
-# SECRETS:
-# passwords are mounted at /run/secrets/ inside containers, never hardcoded

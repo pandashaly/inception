@@ -30,3 +30,6 @@ NGINX — handles incoming web traffic and SSL
 running for eval
 1 make .env and secrets files
 
+
+
+docker volume inspect
