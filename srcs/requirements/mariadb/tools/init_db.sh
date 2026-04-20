@@ -22,13 +22,12 @@ GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 fi
-
 # we're creating a database called wordpress,
 # and a user ssottori with the password panda
 # who has full access to it.
 # WordPress will use those credentials to connect. (secrets)
 
-
 # start the process (pid1) exec replaces this shell
 # --bind-address=0.0.0.0 lets other containers connect to us
+sed -i 's/^skip-networking/#skip-networking/' /etc/my.cnf.d/mariadb-server.cnf
 exec mysqld --user=mysql --bind-address=0.0.0.0
