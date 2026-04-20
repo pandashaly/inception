@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Read passwords from Docker secrets (files mounted at /run/secrets/)
-# This way passwords are never hardcoded anywhere
+# read passwords from my secrets files
+# this way passwords are never hardcoded anywhere
 DB_PASSWORD=$(cat /run/secrets/db_password)
 DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
-# Only run setup if the database hasn't been initialized yet
+# check that database hasn't been initialized yet then RUN
 # /var/lib/mysql/mysql is created by mysql_install_db
 if [ ! -d "/var/lib/mysql/mysql" ]; then
 
@@ -35,7 +35,12 @@ EOF
 
 fi
 
-# Start MariaDB as the main process (PID 1)
-# exec replaces this shell — no background processes, no infinite loops
+# we're creating a database called wordpress,
+# and a user ssottori with the password panda
+# who has full access to it.
+# WordPress will use those credentials to connect. (secrets)
+
+
+# start the process (pid1) exec replaces this shell
 # --bind-address=0.0.0.0 lets other containers connect to us
 exec mysqld --user=mysql --bind-address=0.0.0.0

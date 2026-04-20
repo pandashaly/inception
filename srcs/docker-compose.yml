@@ -4,11 +4,11 @@ services:
     image: nginx
     container_name: nginx
     ports:
-      - "443:443"
+      - "443:443" #its the only container that exposes a port to the outside.
     networks:
       - inception
     volumes:
-      - wordpress:/var/www/html
+      - wordpress:/var/www/html #shares the same wp volume as the wp container
     depends_on:
       - wordpress
     restart: unless-stopped
@@ -18,18 +18,19 @@ services:
     image: wordpress
     container_name: wordpress
     expose:
-      - "9000"
+      - "9000" #conainer uses this port
     networks:
       - inception
     volumes:
       - wordpress:/var/www/html
     depends_on:
-      - mariadb
+      - mariadb # tells Docker to start MariaDB before WordPress
     env_file:
       - .env
     secrets:
       - db_password
-      - credentials
+      - wp_admin_password
+      - wp_user_password
     restart: unless-stopped
 
   mariadb:
@@ -41,7 +42,7 @@ services:
     networks:
       - inception
     volumes:
-      - mariadb:/var/lib/mysql
+      - mariadb:/var/lib/mysql #where mdb stores data
     env_file:
       - .env
     secrets:
@@ -55,13 +56,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/ssottori/data/wordpress
+      device: /home/ssottori/data/vol_wp
   mariadb:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/ssottori/data/mariadb
+      device: /home/ssottori/data/vol_db
 
 networks:
   inception:
@@ -76,3 +77,28 @@ secrets:
     file: ../secrets/wp_admin_password.txt
   wp_user_password:
     file: ../secrets/wp_user_password.txt
+
+
+# HOW IT ALL CONNECTS:
+#
+# internet (port 443)
+#      |
+#   [nginx]          - only entry point, handles SSL, serves the site
+#      |
+# [wordpress]        - runs php-fpm on port 9000, talks to the database
+#      |
+#   [mariadb]        - stores all wp data on port 3306
+#
+# nginx is the only one exposed to the internet
+#
+# VOLUMES:
+# wordpress volume is shared between nginx and wordpress (site files)
+# mariadb has its own volume (database)
+# both stored at /home/ssottori/data/ on the host machine
+
+# NETWORK:
+# all containers are on the same network so they can reach each other by name
+# usign brige network "inception"
+
+# SECRETS:
+# passwords are mounted at /run/secrets/ inside containers, never hardcoded
