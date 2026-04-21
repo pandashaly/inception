@@ -36,7 +36,7 @@ down:
 
 clean:
 	@echo "$(LILAC)◼ Removing containers, network, and volumes...$(RESET)"
-	@$(COMPOSE) down -v --remove-orphans
+	@$(COMPOSE) down --remove-orphans
 	@echo "$(MINT)✔ Project cleanup done!$(RESET)"
 
 fclean: clean
