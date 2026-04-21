@@ -1,7 +1,5 @@
 NAME = inception
-USER = ssottori
 COMPOSE = docker compose -f srcs/docker-compose.yml -p $(NAME)
-DATA_PATH = /home/$(USER)/data
 
 RESET = \033[0m
 MINT = \033[38;5;122m
@@ -11,9 +9,6 @@ PINK = \033[38;5;213m
 all: up
 
 up:
-	@echo "$(LILAC)Creating volume directories...$(RESET)"
-	@mkdir -p $(DATA_PATH)/vol_wp
-	@mkdir -p $(DATA_PATH)/vol_db
 	@echo "$(PINK)Building and starting containers...$(RESET)"
 	@$(COMPOSE) up --build -d
 	@echo "$(MINT)Infrastructure is running!$(RESET)"
@@ -23,12 +18,18 @@ down:
 	@$(COMPOSE) down
 	@echo "$(MINT)Containers stopped successfully!$(RESET)"
 
-fclean: down
-	@echo "$(PINK)Full cleanup in progress...$(RESET)"
-	@docker system prune --all --force --volumes
-	@sudo rm -rf $(DATA_PATH)
+clean:
+	@echo "$(LILAC)Stopping containers and removing project volumes...$(RESET)"
+	@$(COMPOSE) down -v --remove-orphans
+	@echo "$(MINT)Project cleanup done!$(RESET)"
+
+fclean: clean
+	@echo "$(PINK)Removing unused Docker data...$(RESET)"
+	@docker system prune -af
 	@echo "$(MINT)Everything cleaned successfully!$(RESET)"
 
 re: fclean all
 
-.PHONY: all up down fclean re
+.PHONY: all up down clean fclean re
+
+# @docker image rm mariadb wordpress nginx 2>/dev/null || true

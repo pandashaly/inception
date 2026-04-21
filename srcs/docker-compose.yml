@@ -47,17 +47,8 @@ services:
 
 volumes:
   vol_db:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/ssottori/data/vol_db
   vol_wp:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/ssottori/data/vol_wp
+
 
 networks:
   inception:
