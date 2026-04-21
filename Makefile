@@ -41,7 +41,9 @@ clean:
 
 fclean: clean
 	@echo "$(PINK)✦ Removing unused Docker data...$(RESET)"
-	@docker system prune -af
+	@docker volume rm -f $(NAME)_vol_db
+	@docker volume rm -f $(NAME)_vol_wp
+	@docker system prune -af --volumes
 	@echo "$(MINT)✔ Everything cleaned successfully!$(RESET)"
 
 re: fclean all
