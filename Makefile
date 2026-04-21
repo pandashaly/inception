@@ -1,5 +1,7 @@
 NAME = inception
 COMPOSE = docker compose -f srcs/docker-compose.yml -p $(NAME)
+USER = ssottori
+DATA_PATH = /home/$(USER)/data
 
 RESET = \033[0m
 BOLD = \033[1m
@@ -25,6 +27,9 @@ banner:
 	@echo "$(GRAY)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 
 up:
+	@echo "$(LILAC)Creating volume directories...$(RESET)"
+	@mkdir -p $(DATA_PATH)/vol_wp
+	@mkdir -p $(DATA_PATH)/vol_db
 	@echo "$(LILAC)▶ Building and starting containers...$(RESET)"
 	@$(COMPOSE) up --build -d
 	@echo "$(MINT)✔ Infrastructure is running!$(RESET)"
